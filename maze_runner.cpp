@@ -85,7 +85,11 @@ bool walk(pos_t pos) {
 	pos_t posicao_atual = pos;
 	while() {
 		maze[posicao_atual.i][posicao_atual.j] = '.';
+		system("cls");
+		print_maze();
 	}
+
+	
 	// Repita até que a saída seja encontrada ou não existam mais posições não exploradas
 		// Marcar a posição atual com o símbolo '.'
 		// Limpa a tela
