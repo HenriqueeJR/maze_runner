@@ -69,9 +69,10 @@ void print_maze() {
 // Recebe como entrada a posição initial e retorna um booleando indicando se a saída foi encontrada
 bool walk(pos_t pos) {
 
-	maze[pos.i][pos.j] = '.';
+	maze[pos.i][pos.j] = 'o';
 	system("clear");
 	print_maze();
+	maze[pos.i][pos.j] = '.';
 	
 	if (pos.i >= 0 && pos.i < num_rows && (pos.j+1) >= 0 && (pos.j+1) < num_cols) {
 		if (maze[pos.i][pos.j+1] == 'x') {
