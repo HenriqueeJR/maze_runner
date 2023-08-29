@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stack>
+#include <thread>
 #include <stdlib.h>
 
 // Matriz de char representnado o labirinto
@@ -72,6 +73,7 @@ bool walk(pos_t pos) {
 	maze[pos.i][pos.j] = 'o';
 	system("clear");
 	print_maze();
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	maze[pos.i][pos.j] = '.';
 	
 	if (pos.i >= 0 && pos.i < num_rows && (pos.j+1) >= 0 && (pos.j+1) < num_cols) {
@@ -83,6 +85,7 @@ bool walk(pos_t pos) {
 		}
 		else if (maze[pos.i][pos.j+1] == 's') return true;
 		
+
 	}
 
 	if (pos.i >= 0 && pos.i < num_rows && (pos.j-1) >= 0 && (pos.j-1) < num_cols) {
