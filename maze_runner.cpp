@@ -3,6 +3,8 @@
 #include <thread>
 #include <stdlib.h>
 
+using namespace std;
+
 // Matriz de char representnado o labirinto
 char** maze; // Voce também pode representar o labirinto como um vetor de vetores de char (vector<vector<char>>)
 
@@ -65,69 +67,180 @@ void print_maze() {
 	}
 }
 
+bool thread_aux(pos_t pos) {
+
+	std::stack<pos_t> valid_positions_aux;
+	
+	while(1) {
+
+		maze[pos.i][pos.j] = 'o';
+		//system("clear");
+		print_maze();
+		printf("\n\n");
+		printf("%d %d\n\n", pos.i, pos.j);
+		this_thread::sleep_for(chrono::milliseconds(50));
+		maze[pos.i][pos.j] = '.';
+		
+		if (pos.i >= 0 && pos.i < num_rows && (pos.j+1) >= 0 && (pos.j+1) < num_cols) {
+			if (maze[pos.i][pos.j+1] == 'x') {
+				pos_t valid_pos;
+				valid_pos.i = pos.i;
+				valid_pos.j = pos.j+1;
+				valid_positions_aux.push(valid_pos);
+			}
+			else if (maze[pos.i][pos.j+1] == 's') return true;
+			
+
+		}
+
+		if (pos.i >= 0 && pos.i < num_rows && (pos.j-1) >= 0 && (pos.j-1) < num_cols) {
+			if (maze[pos.i][pos.j-1] == 'x') {
+				pos_t valid_pos;
+				valid_pos.i = pos.i;
+				valid_pos.j = pos.j-1;
+				valid_positions_aux.push(valid_pos);
+			}
+			else if (maze[pos.i][pos.j-1] == 's') return true;
+			
+		}
+
+		if (pos.i+1 >= 0 && pos.i+1 < num_rows && (pos.j) >= 0 && (pos.j) < num_cols) {
+			if (maze[pos.i+1][pos.j] == 'x') {
+				pos_t valid_pos;
+				valid_pos.i = pos.i+1;
+				valid_pos.j = pos.j;
+				valid_positions_aux.push(valid_pos);
+			}
+			else if (maze[pos.i+1][pos.j] == 's') return true;
+			
+		}
+
+		if (pos.i-1 >= 0 && pos.i-1 < num_rows && (pos.j) >= 0 && (pos.j) < num_cols) {
+			if (maze[pos.i-1][pos.j] == 'x') {
+				pos_t valid_pos;
+				valid_pos.i = pos.i-1;
+				valid_pos.j = pos.j;
+				valid_positions_aux.push(valid_pos);
+			}
+			else if (maze[pos.i-1][pos.j] == 's') return true;
+			
+		}
+
+		if (valid_positions_aux.size() == 1) {
+			pos = valid_positions_aux.top();
+			valid_positions_aux.pop();	
+		}
+		else if (valid_positions_aux.size() == 2) {
+			pos = valid_positions_aux.top();
+			valid_positions_aux.pop();	
+			thread t(thread_aux, valid_positions_aux.top());
+			t.detach();
+			valid_positions_aux.pop();
+			
+		}
+		else if (valid_positions_aux.size() == 3) {
+			pos = valid_positions_aux.top();
+			valid_positions_aux.pop();	
+			thread t1(thread_aux, valid_positions_aux.top());
+			t1.detach();
+			valid_positions_aux.pop();
+			thread t2(thread_aux, valid_positions_aux.top());
+			t2.detach();
+			valid_positions_aux.pop();
+		}
+		else if (valid_positions_aux.empty()) break;
+		
+	}
+	return false;
+}
+
 
 // Função responsável pela navegação.
 // Recebe como entrada a posição initial e retorna um booleando indicando se a saída foi encontrada
 bool walk(pos_t pos) {
 
-	maze[pos.i][pos.j] = 'o';
-	system("clear");
-	print_maze();
-	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	maze[pos.i][pos.j] = '.';
+	while(1) {
+
+		printf("\n\n boo \n\n");
+
+		maze[pos.i][pos.j] = 'o';
+		//system("clear");
+		print_maze();
+		this_thread::sleep_for(chrono::milliseconds(50));
+		maze[pos.i][pos.j] = '.';
+		
+		if (pos.i >= 0 && pos.i < num_rows && (pos.j+1) >= 0 && (pos.j+1) < num_cols) {
+			if (maze[pos.i][pos.j+1] == 'x') {
+				pos_t valid_pos;
+				valid_pos.i = pos.i;
+				valid_pos.j = pos.j+1;
+				valid_positions.push(valid_pos);
+			}
+			else if (maze[pos.i][pos.j+1] == 's') return true;
+			
+
+		}
+
+		if (pos.i >= 0 && pos.i < num_rows && (pos.j-1) >= 0 && (pos.j-1) < num_cols) {
+			if (maze[pos.i][pos.j-1] == 'x') {
+				pos_t valid_pos;
+				valid_pos.i = pos.i;
+				valid_pos.j = pos.j-1;
+				valid_positions.push(valid_pos);
+			}
+			else if (maze[pos.i][pos.j-1] == 's') return true;
+			
+		}
+
+		if (pos.i+1 >= 0 && pos.i+1 < num_rows && (pos.j) >= 0 && (pos.j) < num_cols) {
+			if (maze[pos.i+1][pos.j] == 'x') {
+				pos_t valid_pos;
+				valid_pos.i = pos.i+1;
+				valid_pos.j = pos.j;
+				valid_positions.push(valid_pos);
+			}
+			else if (maze[pos.i+1][pos.j] == 's') return true;
+			
+		}
+
+		if (pos.i-1 >= 0 && pos.i-1 < num_rows && (pos.j) >= 0 && (pos.j) < num_cols) {
+			if (maze[pos.i-1][pos.j] == 'x') {
+				pos_t valid_pos;
+				valid_pos.i = pos.i-1;
+				valid_pos.j = pos.j;
+				valid_positions.push(valid_pos);
+			}
+			else if (maze[pos.i-1][pos.j] == 's') return true;
+			
+		}
+
+		if (valid_positions.size() == 1) {
+			pos = valid_positions.top();
+			valid_positions.pop();	
+		}
+		else if (valid_positions.size() == 2) {
+			pos = valid_positions.top();
+			valid_positions.pop();	
+			thread t(thread_aux, valid_positions.top());
+			t.detach();
+			valid_positions.pop();
+		}
+		else if (valid_positions.size() == 3) {
+			pos = valid_positions.top();
+			valid_positions.pop();	
+			thread t1(thread_aux, valid_positions.top());
+			t1.detach();
+			valid_positions.pop();
+			thread t2(thread_aux, valid_positions.top());
+			t2.detach();
+			valid_positions.pop();
+		}
+
+		//else if (valid_positions.empty()) break;
+	}
+		
+	return false;
 	
-	if (pos.i >= 0 && pos.i < num_rows && (pos.j+1) >= 0 && (pos.j+1) < num_cols) {
-		if (maze[pos.i][pos.j+1] == 'x') {
-			pos_t valid_pos;
-			valid_pos.i = pos.i;
-			valid_pos.j = pos.j+1;
-			valid_positions.push(valid_pos);
-		}
-		else if (maze[pos.i][pos.j+1] == 's') return true;
-		
-
-	}
-
-	if (pos.i >= 0 && pos.i < num_rows && (pos.j-1) >= 0 && (pos.j-1) < num_cols) {
-		if (maze[pos.i][pos.j-1] == 'x') {
-			pos_t valid_pos;
-			valid_pos.i = pos.i;
-			valid_pos.j = pos.j-1;
-			valid_positions.push(valid_pos);
-		}
-		else if (maze[pos.i][pos.j-1] == 's') return true;
-		
-	}
-
-	if (pos.i+1 >= 0 && pos.i+1 < num_rows && (pos.j) >= 0 && (pos.j) < num_cols) {
-		if (maze[pos.i+1][pos.j] == 'x') {
-			pos_t valid_pos;
-			valid_pos.i = pos.i+1;
-			valid_pos.j = pos.j;
-			valid_positions.push(valid_pos);
-		}
-		else if (maze[pos.i+1][pos.j] == 's') return true;
-		
-	}
-
-	if (pos.i-1 >= 0 && pos.i-1 < num_rows && (pos.j) >= 0 && (pos.j) < num_cols) {
-		if (maze[pos.i-1][pos.j] == 'x') {
-			pos_t valid_pos;
-			valid_pos.i = pos.i-1;
-			valid_pos.j = pos.j;
-			valid_positions.push(valid_pos);
-		}
-		else if (maze[pos.i-1][pos.j] == 's') return true;
-		
-	}
-
-
-	if (!valid_positions.empty()) {
-		pos_t next_position = valid_positions.top();
-		valid_positions.pop();
-		walk(next_position);
-	}
-	else return false;
 }
 
 int main(int argc, char* argv[]) {
