@@ -12,6 +12,9 @@ char** maze; // Voce também pode representar o labirinto como um vetor de vetor
 int num_rows;
 int num_cols;
 
+bool saida_encontrada = false;
+bool finished = false;
+
 // Representação de uma posição
 struct pos_t {
 	int i;
@@ -67,20 +70,17 @@ void print_maze() {
 	}
 }
 
-bool thread_aux(pos_t pos) {
+void thread_aux(pos_t pos) {
 
 	std::stack<pos_t> valid_positions_aux;
 	
-	while(1) {
+	while(!saida_encontrada) {
 
 		maze[pos.i][pos.j] = 'o';
-		//system("clear");
-		print_maze();
-		printf("\n\n");
-		printf("%d %d\n\n", pos.i, pos.j);
-		this_thread::sleep_for(chrono::milliseconds(50));
 		maze[pos.i][pos.j] = '.';
 		
+		this_thread::sleep_for(chrono::milliseconds(50));
+
 		if (pos.i >= 0 && pos.i < num_rows && (pos.j+1) >= 0 && (pos.j+1) < num_cols) {
 			if (maze[pos.i][pos.j+1] == 'x') {
 				pos_t valid_pos;
@@ -88,8 +88,9 @@ bool thread_aux(pos_t pos) {
 				valid_pos.j = pos.j+1;
 				valid_positions_aux.push(valid_pos);
 			}
-			else if (maze[pos.i][pos.j+1] == 's') return true;
-			
+			else if (maze[pos.i][pos.j+1] == 's') {
+				saida_encontrada = true;
+			}
 
 		}
 
@@ -100,7 +101,7 @@ bool thread_aux(pos_t pos) {
 				valid_pos.j = pos.j-1;
 				valid_positions_aux.push(valid_pos);
 			}
-			else if (maze[pos.i][pos.j-1] == 's') return true;
+			else if (maze[pos.i][pos.j-1] == 's') saida_encontrada = true;
 			
 		}
 
@@ -111,7 +112,7 @@ bool thread_aux(pos_t pos) {
 				valid_pos.j = pos.j;
 				valid_positions_aux.push(valid_pos);
 			}
-			else if (maze[pos.i+1][pos.j] == 's') return true;
+			else if (maze[pos.i+1][pos.j] == 's') saida_encontrada = true;
 			
 		}
 
@@ -122,7 +123,7 @@ bool thread_aux(pos_t pos) {
 				valid_pos.j = pos.j;
 				valid_positions_aux.push(valid_pos);
 			}
-			else if (maze[pos.i-1][pos.j] == 's') return true;
+			else if (maze[pos.i-1][pos.j] == 's') saida_encontrada = true;
 			
 		}
 
@@ -148,26 +149,27 @@ bool thread_aux(pos_t pos) {
 			t2.detach();
 			valid_positions_aux.pop();
 		}
-		else if (valid_positions_aux.empty()) break;
+		else if (valid_positions_aux.empty()) {
+			finished = true;
+			break;
+		}
 		
 	}
-	return false;
 }
 
 
 // Função responsável pela navegação.
 // Recebe como entrada a posição initial e retorna um booleando indicando se a saída foi encontrada
-bool walk(pos_t pos) {
+void walk(pos_t pos) {
 
-	while(1) {
+	while(!saida_encontrada) {
 
-		printf("\n\n boo \n\n");
+		//printf("\n\n boo \n\n");
 
 		maze[pos.i][pos.j] = 'o';
-		//system("clear");
-		print_maze();
-		this_thread::sleep_for(chrono::milliseconds(50));
 		maze[pos.i][pos.j] = '.';
+
+		this_thread::sleep_for(chrono::milliseconds(50));
 		
 		if (pos.i >= 0 && pos.i < num_rows && (pos.j+1) >= 0 && (pos.j+1) < num_cols) {
 			if (maze[pos.i][pos.j+1] == 'x') {
@@ -176,7 +178,7 @@ bool walk(pos_t pos) {
 				valid_pos.j = pos.j+1;
 				valid_positions.push(valid_pos);
 			}
-			else if (maze[pos.i][pos.j+1] == 's') return true;
+			else if (maze[pos.i][pos.j+1] == 's') saida_encontrada = true;
 			
 
 		}
@@ -188,7 +190,7 @@ bool walk(pos_t pos) {
 				valid_pos.j = pos.j-1;
 				valid_positions.push(valid_pos);
 			}
-			else if (maze[pos.i][pos.j-1] == 's') return true;
+			else if (maze[pos.i][pos.j-1] == 's') saida_encontrada = true;
 			
 		}
 
@@ -199,7 +201,7 @@ bool walk(pos_t pos) {
 				valid_pos.j = pos.j;
 				valid_positions.push(valid_pos);
 			}
-			else if (maze[pos.i+1][pos.j] == 's') return true;
+			else if (maze[pos.i+1][pos.j] == 's') saida_encontrada = true;
 			
 		}
 
@@ -210,7 +212,7 @@ bool walk(pos_t pos) {
 				valid_pos.j = pos.j;
 				valid_positions.push(valid_pos);
 			}
-			else if (maze[pos.i-1][pos.j] == 's') return true;
+			else if (maze[pos.i-1][pos.j] == 's') saida_encontrada = true;
 			
 		}
 
@@ -235,12 +237,23 @@ bool walk(pos_t pos) {
 			t2.detach();
 			valid_positions.pop();
 		}
+		else if (valid_positions.empty()) {
+			
+			break;
+		}
+	}	
+}
 
-		//else if (valid_positions.empty()) break;
+void impressao() {
+	while (!saida_encontrada) {
+		system("clear");
+		print_maze();
+		this_thread::sleep_for(chrono::milliseconds(50));
 	}
-		
-	return false;
-	
+
+	if (saida_encontrada) printf("%s\n", "SAIDA ENCONTRADA");
+	else printf("%s\n", "SAIDA NAO ENCONTRADA");
+
 }
 
 int main(int argc, char* argv[]) {
@@ -249,12 +262,9 @@ int main(int argc, char* argv[]) {
 	pos_t initial_pos = load_maze(argv[1]);
 
 	// chamar a função de navegação
-	bool exit_found = walk(initial_pos);
+	thread t1(walk, initial_pos);
+	t1.detach();
 
-	if (exit_found) printf("%s\n", "SAIDA ENCONTRADA");
-	else printf("%s\n", "SAIDA NAO ENCONTRADA");
-	
-	
-	
+	impressao();
 	return 0;
 }
